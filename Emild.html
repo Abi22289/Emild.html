@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Tarjeta Día del Niño - Mensajes por Página</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:'Press Start 2P', monospace;
+
+  /* Fondo azul pixelado */
+  background-color: #87cefa;
+  background-image: 
+    linear-gradient(90deg, #87cefa 10%, transparent 10%),
+    linear-gradient(#87cefa 10%, transparent 10%);
+  background-size: 20px 20px;
+  image-rendering: pixelated;
+
+  overflow:hidden;
+  perspective: 1000px;
+}
+
+/* Cuadro de mensaje */
+.card{
+  background:#cce7ff; /* azul claro */
+  padding:25px 20px;
+  border:3px solid #3399ff; /* borde azul */
+  border-radius:12px;
+  text-align:center;
+  max-width:300px;
+  box-shadow:6px 6px 0 #3399ff;
+  letter-spacing:1px;
+  image-rendering: pixelated;
+  font-family:'Press Start 2P', monospace;
+  font-size:12px;
+  display:none;
+  position:relative;
+  z-index:10; /* Los cuadros están siempre por encima de los emojis */
+}
+
+.card h1{
+  font-size:12px;
+  color:#0066cc;
+  margin-bottom:10px;
+}
+
+.card p{
+  font-size:10px;
+  color:#003366;
+  margin-bottom:10px;
+}
+
+button{
+  padding:6px 12px;
+  background:#3399ff;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-family:'Press Start 2P', monospace;
+  font-size:10px;
+  letter-spacing:1px;
+  text-shadow:1px 1px #000;
+  transition: transform 0.2s, background 0.3s;
+}
+
+button:hover{
+  background:#0066cc;
+  transform:scale(1.1);
+}
+
+/* Lluvia de corazones/pollitos fuera de los cuadros */
+.heart{
+  position:absolute;
+  font-size:20px;
+  animation:float 4s linear infinite;
+  z-index:1; /* Debajo de los cuadros */
+  pointer-events:none;
+}
+
+@keyframes float{
+  0%{transform:translateY(0) rotate(0deg); opacity:1;}
+  50%{transform:translateY(-30px) rotate(180deg); opacity:0.8;}
+  100%{transform:translateY(0) rotate(360deg); opacity:1;}
+}
+
+/* Clic aquí inicial */
+.instruction{
+  display:inline-block;
+  padding:10px 20px;
+  background:#aaddff;
+  border:2px solid #3399ff;
+  border-radius:25px;
+  box-shadow:4px 4px 0 #3399ff;
+  font-size:14px;
+  color:#000;
+  letter-spacing:1px;
+  text-align:center;
+  cursor:pointer;
+  text-shadow:1px 1px #fff;
+}
+
+.arrow{
+  font-size:20px;
+  margin-top:5px;
+  animation:bounce 1s infinite;
+}
+
+@keyframes bounce{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-6px);}
+}
+</style>
+</head>
+<body>
+
+<div class="instruction" onclick="startMessages()">
+  Clic aquí
+  <div class="arrow">⬇️</div>
+</div>
+
+<div id="cards-container">
+  <!-- Los mensajes se crearán aquí -->
+</div>
+
+<script>
+const messages = [
+  {title:"🐥 Feliz día del niño 🐥", text:"Desde que te conocí, todo es más bonito ✨"},
+  {title:"🦕 Eres mi dinoamor 🦕", text:"Tu y yo forever"},
+  {title:"🌟 Ten un bonito día mi guapo 🌟", text:"Siempre manten una sonrisa"},
+  {title:"Mu", text:"Te quiero muuuuucho 💖"}
+];
+
+let currentIndex = 0;
+
+function startMessages(){
+  document.querySelector('.instruction').style.display='none';
+  createCards();
+  showCard(currentIndex);
+  startHearts();
+}
+
+function createCards(){
+  const container = document.getElementById('cards-container');
+  messages.forEach((msg,index)=>{
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.innerHTML = `<h1>${msg.title}</h1><p>${msg.text}</p>`;
+    const btn = document.createElement('button');
+    btn.textContent = index < messages.length-1 ? "Siguiente" : "Cerrar";
+    btn.onclick = () => nextCard(index);
+    card.appendChild(btn);
+    container.appendChild(card);
+  });
+}
+
+function showCard(index){
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(c => c.style.display='none');
+  cards[index].style.display='block';
+}
+
+function nextCard(index){
+  if(index < messages.length-1){
+    currentIndex++;
+    showCard(currentIndex);
+  } else {
+    // cerrar todos
+    document.getElementById('cards-container').innerHTML = '';
+    currentIndex=0;
+    document.querySelector('.instruction').style.display='inline-block';
+  }
+}
+
+// Lluvia de corazones/pollitos fuera de los cuadros
+function startHearts(){
+  const card = document.querySelector('.card');
+  const rect = card ? card.getBoundingClientRect() : {left:150, top:100, width:300, height:200};
+  for(let i=0;i<20;i++){
+    const heart=document.createElement("div");
+    heart.classList.add("heart");
+    heart.textContent=Math.random()>0.5?"💗":"🐥";
+
+    // Posición aleatoria fuera del cuadro
+    let x = Math.random()*window.innerWidth;
+    let y = Math.random()*window.innerHeight;
+    // Evitar que caiga dentro del cuadro visible
+    if(card){
+      while(x > rect.left && x < rect.right && y > rect.top && y < rect.bottom){
+        x = Math.random()*window.innerWidth;
+        y = Math.random()*window.innerHeight;
+      }
+    }
+    heart.style.left = x+"px";
+    heart.style.top = y+"px";
+    heart.style.fontSize = (16 + Math.random()*10) + "px";
+    heart.style.animationDuration = (3 + Math.random()*2) + "s";
+    heart.style.animationDelay = Math.random() + "s";
+    document.body.appendChild(heart);
+    setTimeout(()=>heart.remove(),6000);
+  }
+  setTimeout(startHearts,800);
+}
+</script>
+
+</body>
+</html>
